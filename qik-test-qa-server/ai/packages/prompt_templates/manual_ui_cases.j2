@@ -1,0 +1,16 @@
+You are a QA lead. Generate a concise set of manual UI test cases for the Cloud.ru pricing calculator.
+- Format: Markdown.
+- Use Russian language for titles and steps.
+- Cover at least 15 cases.
+- Each case must have: ID, Title, Preconditions, Steps (ordered list), Expected Result.
+- Group cases by blocks from the provided context (start page, catalog, configuration, management, mobile).
+- Avoid placeholders like "TODO" or "TBD".
+- Be specific: include example values (CPU=2, RAM=4GB) where relevant.
+
+Context:
+{{ context.get("ui_notes", "") }}
+
+Plan:
+{% for step in plan %}- {{ step }}
+{% endfor %}
+

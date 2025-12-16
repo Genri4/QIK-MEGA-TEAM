@@ -1,0 +1,101 @@
+name: "monitoring"
+
+networks:
+  qik_ai_cluster:
+    external: true
+
+services:
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "9080:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: "victoriametrics-logs-datasource"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning/:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards/:ro
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - qik_ai_cluster
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v3.0.0
+    container_name: prometheus
+    hostname: prometheus
+    user: root
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../.deploy/metrics/prometheus:/prometheus
+      - ./prometheus/config.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    networks:
+      - qik_ai_cluster
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:9090/-/ready" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    hostname: loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - ../.deploy/metrics/loki:/loki
+    networks:
+      - qik_ai_cluster
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.2
+    container_name: cadvisor
+    hostname: cadvisor
+    restart: unless-stopped
+    ports:
+      - "6060:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - qik_ai_cluster
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    restart: unless-stopped
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - qik_ai_cluster

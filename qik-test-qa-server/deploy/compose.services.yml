@@ -1,0 +1,104 @@
+name: "apps"
+
+networks:
+  qik_ai_cluster:
+    external: true
+
+x-service: &service
+  restart: unless-stopped
+  environment:
+    ENVIRONMENT: ${ENVIRONMENT:-local}
+    NATS_URL: nats://nats:4222
+  networks:
+    - qik_ai_cluster
+
+x-nest-build: &nest-build
+  context: ..
+  dockerfile: gate/Dockerfile
+
+services:
+  api:
+    <<: *service
+    build:
+      <<: *nest-build
+      args:
+        SERVICE_NAME: api
+    ports:
+      - "3004:3004"
+    container_name: api
+    depends_on:
+      - nats
+      - postgres
+
+  client:
+     build:
+       context: ../../client
+       dockerfile: Dockerfile
+     environment:
+       - NODE_ENV=production
+     ports:
+       - 4002:3000
+     restart: unless-stopped
+     depends_on:
+       - nats
+       - postgres
+       - api
+
+  user:
+    <<: *service
+    build:
+      <<: *nest-build
+      args:
+        SERVICE_NAME: user
+    container_name: user
+    depends_on:
+      - nats
+      - postgres
+      - api
+
+  messages:
+    <<: *service
+    build:
+      <<: *nest-build
+      args:
+        SERVICE_NAME: messages
+    container_name: messages
+    depends_on:
+      - nats
+      - postgres
+      - api
+
+  chats:
+    <<: *service
+    build:
+      <<: *nest-build
+      args:
+        SERVICE_NAME: chats
+    container_name: chats
+    depends_on:
+      - nats
+      - postgres
+      - api
+
+  generate:
+    <<: *service
+    build:
+      context: ../
+      dockerfile: ai/Dockerfile
+    container_name: generate
+    ports:
+      - "8001:8000"
+    depends_on:
+      - nats
+      - user
+      - messages
+      - chats
+      - postgres
+      - api
+    # (опционально для разработки) пробрасываем код и libs из хоста внутрь контейнера
+    # volumes:
+    #   - ../ai:/app/ai     # если нужен live-reload / отладка
+    #   - ../libs:/app/libs
+    environment:
+      PYTHONPATH: /app
+      NATS_URL: nats://nats:4222

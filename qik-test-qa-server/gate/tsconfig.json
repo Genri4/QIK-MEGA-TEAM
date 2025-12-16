@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@contracts": ["libs/contracts/src"],
+      "@domains": ["libs/domains/src"],
+      "@infractract/*": ["libs/infractract/src/*"],
+      "@infractract": ["libs/infractract/src"],
+      "@shared": ["libs/shared/src"],
+      "@systems": ["libs/systems/src"]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+You are an expert QA automation engineer. Generate Playwright + pytest end-to-end tests for the Cloud.ru pricing calculator UI.
+- Output raw Python code (no markdown fences).
+- Use pytest style with async Playwright fixtures (`page`).
+- Use AAA pattern with comments.
+- Add Allure labels: feature/story/title/owner.
+- Cover the main user flows from context (start page, catalog, configure compute, add/remove service, mobile viewport).
+- Organize tests under `tests/e2e/` naming like `test_calculator_e2e.py`.
+- Include at least 5 E2E scenarios.
+- Do not use TODO; use realistic selectors (data-testid if unknown, prefix with `data-testid=`).
+
+Context:
+{{ context.get("ui_notes", "") }}
+

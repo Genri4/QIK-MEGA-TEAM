@@ -1,0 +1,16 @@
+You are a QA lead. Generate a concise set of manual API test cases for Evolution Compute API (VMs, Disks, Flavors).
+- Format: Markdown.
+- Use Russian language.
+- Cover at least 15 cases total across VMs, Disks, Flavors.
+- Each case must have: ID, Title, Preconditions (auth token, base URL), Request, Expected Response (status, schema).
+- Include positive and negative scenarios (invalid UUID, missing auth).
+- Reference the context below for required endpoints.
+- Avoid placeholders like "TODO".
+
+Context:
+{{ context.get("api_notes", "") }}
+
+Plan:
+{% for step in plan %}- {{ step }}
+{% endfor %}
+

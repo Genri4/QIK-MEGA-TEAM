@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:17.0
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+
+    volumes:
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql:ro
+
+  adminer:
+    image: adminer:5.3.0-standalone

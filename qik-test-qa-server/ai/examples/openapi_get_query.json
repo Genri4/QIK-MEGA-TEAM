@@ -1,0 +1,17 @@
+{
+  "paths": {
+    "/echo": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "msg",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ]
+      }
+    }
+  }
+}
+
